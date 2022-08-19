@@ -1,8 +1,6 @@
 streamlit
 opencv-python
-ffmpeg
-libsm6
-libxext6
+opencv-python-headless==4.5.3.56
 numpy
 temp
 matplotlib>=3.2.2
