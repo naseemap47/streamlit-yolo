@@ -1,5 +1,6 @@
-opencv-python==4.5.5.64
+opencv-python==4.6.0.66
 opencv-python-headless==4.5.5.62
+opencv-contrib-python==4.6.0.66
 temp
 matplotlib>=3.2.2
 numpy>=1.18.5
