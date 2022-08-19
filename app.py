@@ -1,6 +1,7 @@
 import streamlit as st
 import cv2
 from utils.hubconf import custom
+from utils.plots import plot_one_box
 import numpy as np
 
 
@@ -8,34 +9,38 @@ st.title('YOLOv7 Predictions')
 sample_img = cv2.imread('sample.jpg')
 sample_img = cv2.cvtColor(sample_img, cv2.COLOR_BGR2RGB)
 FRAME_WINDOW = st.image(sample_img)
-pred = st.checkbox('Predict Using YOLOv7')
 st.sidebar.title('Settings')
-st.markdown(
-    """
-    <style>
-    [data-testid="stSidebar"][aria-expanded="true"] > div:first-child(width: 400px;)
-    [data-testid="stSidebar"][aria-expanded="false"] > div:first-child(width: 400px; margin-left: -400px)
-    </style>
-    """,
-unsafe_allow_html=True
-)
-st.sidebar.markdown('---')
-st.sidebar.text('Options')
-webcam = st.sidebar.checkbox('Webcam')
-st.sidebar.markdown('---')
+# st.sidebar.markdown('--')
+options = st.sidebar.radio('Options', ('Webcam','Image','Video'),index=1)
+# st.sidebar.markdown('---')
 confidence = st.sidebar.slider('Confidence', min_value=0.0, max_value=1.0, value=0.25)
-st.sidebar.markdown('---')
-upload_img_file = st.sidebar.file_uploader('Upload Image', type=['jpg', 'jpeg', 'png'])
-print(upload_img_file)
-if upload_img_file is not None:
-    file_bytes = np.asarray(bytearray(upload_img_file.read()), dtype=np.uint8)
-    opencv_img = cv2.imdecode(file_bytes, 1)
-    FRAME_WINDOW = st.image(opencv_img, channels='BGR')
+# st.sidebar.markdown('---')
+if options=='Image':
+    pred = st.checkbox('Predict Using YOLOv7')
+    upload_img_file = st.sidebar.file_uploader('Upload Image', type=['jpg', 'jpeg', 'png'])
 
-if pred:
-    model = custom(path_or_model='yolov7.pt')
+    if upload_img_file is not None:
+        file_bytes = np.asarray(bytearray(upload_img_file.read()), dtype=np.uint8)
+        opencv_img = cv2.imdecode(file_bytes, 1)
+        FRAME_WINDOW.image(opencv_img, channels='BGR')
 
-if webcam:
+        if pred:
+            model = custom(path_or_model='yolov7.pt')
+            bbox_list = []
+            results = model(opencv_img)
+            # Bounding Box
+            box = results.pandas().xyxy[0]
+            class_list = box['class'].to_list()
+            f = open('class.txt', 'r').read()
+            class_labels = f.split("\n")
+            for i in box.index:
+                xmin, ymin, xmax, ymax = int(box['xmin'][i]), int(box['ymin'][i]), int(box['xmax'][i]), int(box['ymax'][i])
+                bbox_list.append([xmin, ymin, xmax, ymax])
+            for bbox, id in zip(bbox_list, class_list):
+                plot_one_box(bbox, opencv_img, label=class_labels[id], color=[0,0,255], line_thickness=2)
+            FRAME_WINDOW.image(opencv_img, channels='BGR')
+
+if options=='Webcam':
     cap = cv2.VideoCapture(0)
     while True:
         success, img = cap.read()
