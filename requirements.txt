@@ -1,6 +1,6 @@
 streamlit
-opencv-python==4.5.5.64
-opencv-python-headless==4.5.3.56
+opencv-python
+opencv-python-headless==4.1.2.30
 numpy
 temp
 matplotlib>=3.2.2
