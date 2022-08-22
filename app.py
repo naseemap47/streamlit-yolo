@@ -90,7 +90,8 @@ if options == 'Webcam':
             while True:
                 success, img = cap.read()
                 if not success:
-                    st.warning(f'Webcam channel {cam_options} NOT working\nChange channel or Connect webcam properly!!')
+                    st.error(f'Webcam channel {cam_options} NOT working\nChange channel or Connect webcam properly!!')
+                    break
                 bbox_list = []
                 results = model(img)
                 # Bounding Box
@@ -121,7 +122,8 @@ if options == 'RTSP':
         while True:
             success, img = cap.read()
             if not success:
-                    st.warning(f'RSTP channel {rtsp_options} NOT working\nChange channel or Connect properly!!')
+                    st.error(f'RSTP channel {rtsp_options} NOT working\nChange channel or Connect properly!!')
+                    break
             bbox_list = []
             results = model(img)
             # Bounding Box
