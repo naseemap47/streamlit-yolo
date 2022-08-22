@@ -90,7 +90,9 @@ if options == 'Webcam':
             while True:
                 success, img = cap.read()
                 if not success:
-                    st.error(f'Webcam channel {cam_options} NOT working\nChange channel or Connect webcam properly!!')
+                    st.error(
+                        f'Webcam channel {cam_options} NOT working\n \
+                        Change channel or Connect webcam properly!!')
                     break
                 bbox_list = []
                 results = model(img)
@@ -111,19 +113,29 @@ if options == 'Webcam':
                 FRAME_WINDOW.image(img, channels='BGR')
 
 
+# RTSP
 if options == 'RTSP':
-    rtsp_options = st.sidebar.selectbox('RTSP Channel',
-                                        ('Select Channel', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'))
+    rtsp_url = st.sidebar.text_input(
+        'RTSP URL:',
+        'eg: rtsp://admin:name6666@198.162.1.58/cam/realmonitor?channel=0&subtype=0'
+    )
+    st.sidebar.markdown('Press Enter after pasting RTSP URL')
+    url = rtsp_url[:-11]
+    rtsp_options = st.sidebar.selectbox(
+        'RTSP Channel',
+        ('Select Channel', '0', '1', '2', '3',
+            '4', '5', '6', '7', '8', '9', '10')
+    )
     model = custom(path_or_model='yolov7.pt')
     if not rtsp_options == 'Select Channel':
-        cap = cv2.VideoCapture(
-            f'rtsp://admin:eternaler4444@192.168.0.185:554/cam/realmonitor?channel={rtsp_options}&subtype=0')
+        cap = cv2.VideoCapture(f'{url}{rtsp_options}&subtype=0')
 
         while True:
             success, img = cap.read()
             if not success:
-                    st.error(f'RSTP channel {rtsp_options} NOT working\nChange channel or Connect properly!!')
-                    break
+                st.error(
+                    f'RSTP channel {rtsp_options} NOT working\nChange channel or Connect properly!!')
+                break
             bbox_list = []
             results = model(img)
             # Bounding Box
