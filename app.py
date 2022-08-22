@@ -19,7 +19,12 @@ gpu_option = st.sidebar.radio(
     'PU Options:', ('CPU', 'GPU'))
 
 if not torch.cuda.is_available():
-    st.sidebar.warning('CUDA Not Available, So choose CPU')
+    st.sidebar.warning('CUDA Not Available, So choose CPU', icon="⚠️")
+else:
+    st.sidebar.success(
+        'GPU is Available on this Device, Choose GPU for the best performance',
+        icon="✅"
+    )
 
 confidence = st.sidebar.slider(
     'Detection Confidence', min_value=0.0, max_value=1.0, value=0.25)
@@ -113,7 +118,9 @@ if options == 'Webcam':
                 if not success:
                     st.error(
                         f'Webcam channel {cam_options} NOT working\n \
-                        Change channel or Connect webcam properly!!')
+                        Change channel or Connect webcam properly!!',
+                        icon="🚨"
+                    )
                     break
                 bbox_list = []
                 results = model(img)
@@ -161,7 +168,9 @@ if options == 'RTSP':
             success, img = cap.read()
             if not success:
                 st.error(
-                    f'RSTP channel {rtsp_options} NOT working\nChange channel or Connect properly!!')
+                    f'RSTP channel {rtsp_options} NOT working\nChange channel or Connect properly!!',
+                    icon="🚨"
+                )
                 break
             bbox_list = []
             results = model(img)
