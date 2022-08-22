@@ -1,9 +1,11 @@
 import streamlit as st
 import cv2
+from streamlit_webrtc import webrtc_streamer, RTCConfiguration
 from utils.hubconf import custom
 from utils.plots import plot_one_box
 import numpy as np
 import tempfile
+import av
 
 
 st.title('YOLOv7 Predictions')
@@ -81,17 +83,44 @@ if options == 'Video':
 
 # Web-cam
 if options == 'Webcam':
-    cam_options = st.sidebar.selectbox('Webcam Channel',
-                                       ('Select Channel', '0', '1', '2', '3'))
-    model = custom(path_or_model='yolov7.pt')
-    if len(cam_options) != 0:
-        if not cam_options == 'Select Channel':
-            cap = cv2.VideoCapture(int(cam_options))
-            while True:
-                success, img = cap.read()
-                if not success:
-                    st.error(f'Webcam channel {cam_options} NOT working\nChange channel or Connect webcam properly!!')
-                    break
+    webrtc_option = st.sidebar.radio('Working on Local?', ('Yes', 'No'))
+    if webrtc_option=='Yes':
+        cam_options = st.sidebar.selectbox('Webcam Channel',
+                                        ('Select Channel', '0', '1', '2', '3'))
+        model = custom(path_or_model='yolov7.pt')
+        if len(cam_options) != 0:
+            if not cam_options == 'Select Channel':
+                cap = cv2.VideoCapture(int(cam_options))
+                while True:
+                    success, img = cap.read()
+                    if not success:
+                        st.error(f'Webcam channel {cam_options} NOT working\nChange channel or Connect webcam properly!!')
+                        break
+                    bbox_list = []
+                    results = model(img)
+                    # Bounding Box
+                    box = results.pandas().xyxy[0]
+                    class_list = box['class'].to_list()
+                    f = open('class.txt', 'r').read()
+                    class_labels = f.split("\n")
+                    for i in box.index:
+                        xmin, ymin, xmax, ymax, conf = int(box['xmin'][i]), int(box['ymin'][i]), int(box['xmax'][i]), \
+                            int(box['ymax'][i]), box['confidence'][i]
+                        if conf > confidence:
+                            bbox_list.append([xmin, ymin, xmax, ymax])
+                    if len(bbox_list) != 0:
+                        for bbox, id in zip(bbox_list, class_list):
+                            plot_one_box(bbox, img, label=class_labels[id], color=[
+                                0, 0, 255], line_thickness=2)
+                    FRAME_WINDOW.image(img, channels='BGR')
+
+    # Browser-Cam                
+    if webrtc_option=='No':
+        model = custom(path_or_model='yolov7.pt')
+        class VideoProcessor:
+            def recv(self, frame):            
+                # Frame
+                img = frame.to_ndarray(format="bgr")
                 bbox_list = []
                 results = model(img)
                 # Bounding Box
@@ -108,7 +137,15 @@ if options == 'Webcam':
                     for bbox, id in zip(bbox_list, class_list):
                         plot_one_box(bbox, img, label=class_labels[id], color=[
                             0, 0, 255], line_thickness=2)
-                FRAME_WINDOW.image(img, channels='BGR')
+
+                return av.VideoFrame.from_ndarray(img, format='bgr')
+                
+        webrtc_streamer(
+            key="example", video_processor_factory=VideoProcessor,
+            rtc_configuration=RTCConfiguration(
+                {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+            )
+        )
 
 
 if options == 'RTSP':
