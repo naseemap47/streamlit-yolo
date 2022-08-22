@@ -1,5 +1,6 @@
 import streamlit as st
 import cv2
+import torch
 from utils.hubconf import custom
 from utils.plots import plot_one_box
 import numpy as np
@@ -12,7 +13,14 @@ FRAME_WINDOW = st.image(sample_img, channels='BGR')
 st.sidebar.title('Settings')
 
 options = st.sidebar.radio(
-    'Options', ('Webcam', 'Image', 'Video', 'RTSP'), index=1)
+    'Options:', ('Webcam', 'Image', 'Video', 'RTSP'), index=1)
+
+gpu_option = st.sidebar.radio(
+    'PU Options:', ('CPU', 'GPU'))
+
+if not torch.cuda.is_available():
+    st.sidebar.warning('CUDA Not Available, So choose CPU')
+
 confidence = st.sidebar.slider(
     'Detection Confidence', min_value=0.0, max_value=1.0, value=0.25)
 
@@ -28,7 +36,10 @@ if options == 'Image':
         FRAME_WINDOW.image(opencv_img, channels='BGR')
 
         if pred:
-            model = custom(path_or_model='yolov7.pt')
+            if gpu_option == 'CPU':
+                model = custom(path_or_model='yolov7.pt')
+            if gpu_option == 'GPU':
+                model = custom(path_or_model='yolov7.pt', gpu=True)
             bbox_list = []
             results = model(opencv_img)
             # Bounding Box
@@ -53,7 +64,12 @@ if options == 'Video':
         'Upload Video', type=['mp4', 'avi', 'mkv'])
     if upload_video_file is not None:
         pred = st.checkbox('Predict Using YOLOv7')
-        model = custom(path_or_model='yolov7.pt')
+        # Model
+        if gpu_option == 'CPU':
+            model = custom(path_or_model='yolov7.pt')
+        if gpu_option == 'GPU':
+            model = custom(path_or_model='yolov7.pt', gpu=True)
+
         tfile = tempfile.NamedTemporaryFile(delete=False)
         tfile.write(upload_video_file.read())
         cap = cv2.VideoCapture(tfile.name)
@@ -83,7 +99,12 @@ if options == 'Video':
 if options == 'Webcam':
     cam_options = st.sidebar.selectbox('Webcam Channel',
                                        ('Select Channel', '0', '1', '2', '3'))
-    model = custom(path_or_model='yolov7.pt')
+    # Model
+    if gpu_option == 'CPU':
+        model = custom(path_or_model='yolov7.pt')
+    if gpu_option == 'GPU':
+        model = custom(path_or_model='yolov7.pt', gpu=True)
+
     if len(cam_options) != 0:
         if not cam_options == 'Select Channel':
             cap = cv2.VideoCapture(int(cam_options))
@@ -119,14 +140,20 @@ if options == 'RTSP':
         'RTSP URL:',
         'eg: rtsp://admin:name6666@198.162.1.58/cam/realmonitor?channel=0&subtype=0'
     )
-    st.sidebar.markdown('Press Enter after pasting RTSP URL')
+    # st.sidebar.markdown('Press Enter after pasting RTSP URL')
     url = rtsp_url[:-11]
     rtsp_options = st.sidebar.selectbox(
         'RTSP Channel',
         ('Select Channel', '0', '1', '2', '3',
             '4', '5', '6', '7', '8', '9', '10')
     )
-    model = custom(path_or_model='yolov7.pt')
+
+    # Model
+    if gpu_option == 'CPU':
+        model = custom(path_or_model='yolov7.pt')
+    if gpu_option == 'GPU':
+        model = custom(path_or_model='yolov7.pt', gpu=True)
+
     if not rtsp_options == 'Select Channel':
         cap = cv2.VideoCapture(f'{url}{rtsp_options}&subtype=0')
 

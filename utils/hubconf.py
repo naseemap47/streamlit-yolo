@@ -54,7 +54,7 @@ def create(name, pretrained, channels, classes, autoshape):
         raise Exception(s) from e
 
 
-def custom(path_or_model='path/to/model.pt', autoshape=True):
+def custom(path_or_model='path/to/model.pt', autoshape=True, gpu=False):
     """custom mode
 
     Arguments (3 options):
@@ -74,7 +74,8 @@ def custom(path_or_model='path/to/model.pt', autoshape=True):
     hub_model.names = model.names  # class names
     if autoshape:
         hub_model = hub_model.autoshape()  # for file/URI/PIL/cv2/np inputs and NMS
-    device = select_device('0' if torch.cuda.is_available() else 'cpu')  # default to GPU if available
+    # device = select_device('0' if torch.cuda.is_available() else 'cpu')  # default to GPU if available
+    device = select_device('0' if gpu else 'cpu')
     return hub_model.to(device)
 
 
