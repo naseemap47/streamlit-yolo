@@ -12,6 +12,12 @@ sample_img = cv2.imread('sample.jpg')
 FRAME_WINDOW = st.image(sample_img, channels='BGR')
 st.sidebar.title('Settings')
 
+# path to model
+path_model_file = st.sidebar.text_input(
+    'path to YOLOv7 Model:',
+    'eg: dir/yolov7.pt'
+)
+
 options = st.sidebar.radio(
     'Options:', ('Webcam', 'Image', 'Video', 'RTSP'), index=1)
 
@@ -42,9 +48,9 @@ if options == 'Image':
 
         if pred:
             if gpu_option == 'CPU':
-                model = custom(path_or_model='yolov7.pt')
+                model = custom(path_or_model=path_model_file)
             if gpu_option == 'GPU':
-                model = custom(path_or_model='yolov7.pt', gpu=True)
+                model = custom(path_or_model=path_model_file, gpu=True)
             bbox_list = []
             results = model(opencv_img)
             # Bounding Box
@@ -71,9 +77,9 @@ if options == 'Video':
         pred = st.checkbox('Predict Using YOLOv7')
         # Model
         if gpu_option == 'CPU':
-            model = custom(path_or_model='yolov7.pt')
+            model = custom(path_or_model=path_model_file)
         if gpu_option == 'GPU':
-            model = custom(path_or_model='yolov7.pt', gpu=True)
+            model = custom(path_or_model=path_model_file, gpu=True)
 
         tfile = tempfile.NamedTemporaryFile(delete=False)
         tfile.write(upload_video_file.read())
@@ -106,9 +112,9 @@ if options == 'Webcam':
                                        ('Select Channel', '0', '1', '2', '3'))
     # Model
     if gpu_option == 'CPU':
-        model = custom(path_or_model='yolov7.pt')
+        model = custom(path_or_model=path_model_file)
     if gpu_option == 'GPU':
-        model = custom(path_or_model='yolov7.pt', gpu=True)
+        model = custom(path_or_model=path_model_file, gpu=True)
 
     if len(cam_options) != 0:
         if not cam_options == 'Select Channel':
@@ -157,9 +163,9 @@ if options == 'RTSP':
 
     # Model
     if gpu_option == 'CPU':
-        model = custom(path_or_model='yolov7.pt')
+        model = custom(path_or_model=path_model_file)
     if gpu_option == 'GPU':
-        model = custom(path_or_model='yolov7.pt', gpu=True)
+        model = custom(path_or_model=path_model_file, gpu=True)
 
     if not rtsp_options == 'Select Channel':
         cap = cv2.VideoCapture(f'{url}{rtsp_options}&subtype=0')
