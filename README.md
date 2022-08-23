@@ -12,6 +12,10 @@ So better to clone `master` branch and run in your own system
 git clone https://github.com/naseemap47/streamlit-yolov7.git
 cd streamlit-yolov7
 ```
+Install dependency
+```
+pip3 install -r requirements.txt
+```
 Run **Streamlit**
 ```
 streamlit run app.py
