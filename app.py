@@ -18,82 +18,56 @@ path_model_file = st.sidebar.text_input(
     'eg: dir/yolov7.pt'
 )
 
-options = st.sidebar.radio(
-    'Options:', ('Webcam', 'Image', 'Video', 'RTSP'), index=1)
+# Class txt
+path_to_class_txt = st.sidebar.file_uploader(
+    'Class.txt:', type=['txt']
+)
 
-gpu_option = st.sidebar.radio(
-    'PU Options:', ('CPU', 'GPU'))
+if path_to_class_txt is not None:
 
-if not torch.cuda.is_available():
-    st.sidebar.warning('CUDA Not Available, So choose CPU', icon="⚠️")
-else:
-    st.sidebar.success(
-        'GPU is Available on this Device, Choose GPU for the best performance',
-        icon="✅"
-    )
+    options = st.sidebar.radio(
+        'Options:', ('Webcam', 'Image', 'Video', 'RTSP'), index=1)
 
-confidence = st.sidebar.slider(
-    'Detection Confidence', min_value=0.0, max_value=1.0, value=0.25)
+    gpu_option = st.sidebar.radio(
+        'PU Options:', ('CPU', 'GPU'))
 
-# Image
-if options == 'Image':
-    upload_img_file = st.sidebar.file_uploader(
-        'Upload Image', type=['jpg', 'jpeg', 'png'])
-    if upload_img_file is not None:
-        pred = st.checkbox('Predict Using YOLOv7')
-        file_bytes = np.asarray(
-            bytearray(upload_img_file.read()), dtype=np.uint8)
-        opencv_img = cv2.imdecode(file_bytes, 1)
-        FRAME_WINDOW.image(opencv_img, channels='BGR')
+    if not torch.cuda.is_available():
+        st.sidebar.warning('CUDA Not Available, So choose CPU', icon="⚠️")
+    else:
+        st.sidebar.success(
+            'GPU is Available on this Device, Choose GPU for the best performance',
+            icon="✅"
+        )
 
-        if pred:
-            if gpu_option == 'CPU':
-                model = custom(path_or_model=path_model_file)
-            if gpu_option == 'GPU':
-                model = custom(path_or_model=path_model_file, gpu=True)
-            bbox_list = []
-            results = model(opencv_img)
-            # Bounding Box
-            box = results.pandas().xyxy[0]
-            class_list = box['class'].to_list()
-            f = open('class.txt', 'r').read()
-            class_labels = f.split("\n")
-            for i in box.index:
-                xmin, ymin, xmax, ymax, conf = int(box['xmin'][i]), int(box['ymin'][i]), int(box['xmax'][i]), \
-                    int(box['ymax'][i]), box['confidence'][i]
-                if conf > confidence:
-                    bbox_list.append([xmin, ymin, xmax, ymax])
-            if len(bbox_list) != 0:
-                for bbox, id in zip(bbox_list, class_list):
-                    plot_one_box(bbox, opencv_img, label=class_labels[id], color=[
-                                 0, 0, 255], line_thickness=2)
+    confidence = st.sidebar.slider(
+        'Detection Confidence', min_value=0.0, max_value=1.0, value=0.25)
+
+    # Image
+    if options == 'Image':
+        upload_img_file = st.sidebar.file_uploader(
+            'Upload Image', type=['jpg', 'jpeg', 'png'])
+        if upload_img_file is not None:
+            pred = st.checkbox('Predict Using YOLOv7')
+            file_bytes = np.asarray(
+                bytearray(upload_img_file.read()), dtype=np.uint8)
+            opencv_img = cv2.imdecode(file_bytes, 1)
             FRAME_WINDOW.image(opencv_img, channels='BGR')
 
-# Video
-if options == 'Video':
-    upload_video_file = st.sidebar.file_uploader(
-        'Upload Video', type=['mp4', 'avi', 'mkv'])
-    if upload_video_file is not None:
-        pred = st.checkbox('Predict Using YOLOv7')
-        # Model
-        if gpu_option == 'CPU':
-            model = custom(path_or_model=path_model_file)
-        if gpu_option == 'GPU':
-            model = custom(path_or_model=path_model_file, gpu=True)
-
-        tfile = tempfile.NamedTemporaryFile(delete=False)
-        tfile.write(upload_video_file.read())
-        cap = cv2.VideoCapture(tfile.name)
-        success, img = cap.read()
-        if pred:
-            while success:
+            if pred:
+                if gpu_option == 'CPU':
+                    model = custom(path_or_model=path_model_file)
+                if gpu_option == 'GPU':
+                    model = custom(path_or_model=path_model_file, gpu=True)
                 bbox_list = []
-                results = model(img)
+                results = model(opencv_img)
                 # Bounding Box
                 box = results.pandas().xyxy[0]
                 class_list = box['class'].to_list()
-                f = open('class.txt', 'r').read()
-                class_labels = f.split("\n")
+                
+                # read class.txt
+                bytes_data = path_to_class_txt.getvalue()
+                class_labels = bytes_data.decode('utf-8').split("\n")
+                
                 for i in box.index:
                     xmin, ymin, xmax, ymax, conf = int(box['xmin'][i]), int(box['ymin'][i]), int(box['xmax'][i]), \
                         int(box['ymax'][i]), box['confidence'][i]
@@ -101,30 +75,122 @@ if options == 'Video':
                         bbox_list.append([xmin, ymin, xmax, ymax])
                 if len(bbox_list) != 0:
                     for bbox, id in zip(bbox_list, class_list):
-                        plot_one_box(bbox, img, label=class_labels[id], color=[
-                                     0, 0, 255], line_thickness=2)
-                FRAME_WINDOW.image(img, channels='BGR')
+                        plot_one_box(bbox, opencv_img, label=class_labels[id], color=[
+                                    0, 0, 255], line_thickness=2)
+                FRAME_WINDOW.image(opencv_img, channels='BGR')
+
+    # Video
+    if options == 'Video':
+        upload_video_file = st.sidebar.file_uploader(
+            'Upload Video', type=['mp4', 'avi', 'mkv'])
+        if upload_video_file is not None:
+            pred = st.checkbox('Predict Using YOLOv7')
+            # Model
+            if gpu_option == 'CPU':
+                model = custom(path_or_model=path_model_file)
+            if gpu_option == 'GPU':
+                model = custom(path_or_model=path_model_file, gpu=True)
+
+            tfile = tempfile.NamedTemporaryFile(delete=False)
+            tfile.write(upload_video_file.read())
+            cap = cv2.VideoCapture(tfile.name)
+            success, img = cap.read()
+            if pred:
+                while success:
+                    bbox_list = []
+                    results = model(img)
+                    # Bounding Box
+                    box = results.pandas().xyxy[0]
+                    class_list = box['class'].to_list()
+                    
+                    # read class.txt
+                    bytes_data = path_to_class_txt.getvalue()
+                    class_labels = bytes_data.decode('utf-8').split("\n")
+                    
+                    for i in box.index:
+                        xmin, ymin, xmax, ymax, conf = int(box['xmin'][i]), int(box['ymin'][i]), int(box['xmax'][i]), \
+                            int(box['ymax'][i]), box['confidence'][i]
+                        if conf > confidence:
+                            bbox_list.append([xmin, ymin, xmax, ymax])
+                    if len(bbox_list) != 0:
+                        for bbox, id in zip(bbox_list, class_list):
+                            plot_one_box(bbox, img, label=class_labels[id], color=[
+                                        0, 0, 255], line_thickness=2)
+                    FRAME_WINDOW.image(img, channels='BGR')
 
 
-# Web-cam
-if options == 'Webcam':
-    cam_options = st.sidebar.selectbox('Webcam Channel',
-                                       ('Select Channel', '0', '1', '2', '3'))
-    # Model
-    if gpu_option == 'CPU':
-        model = custom(path_or_model=path_model_file)
-    if gpu_option == 'GPU':
-        model = custom(path_or_model=path_model_file, gpu=True)
+    # Web-cam
+    if options == 'Webcam':
+        cam_options = st.sidebar.selectbox('Webcam Channel',
+                                        ('Select Channel', '0', '1', '2', '3'))
+        # Model
+        if gpu_option == 'CPU':
+            model = custom(path_or_model=path_model_file)
+        if gpu_option == 'GPU':
+            model = custom(path_or_model=path_model_file, gpu=True)
 
-    if len(cam_options) != 0:
-        if not cam_options == 'Select Channel':
-            cap = cv2.VideoCapture(int(cam_options))
+        if len(cam_options) != 0:
+            if not cam_options == 'Select Channel':
+                cap = cv2.VideoCapture(int(cam_options))
+                while True:
+                    success, img = cap.read()
+                    if not success:
+                        st.error(
+                            f'Webcam channel {cam_options} NOT working\n \
+                            Change channel or Connect webcam properly!!',
+                            icon="🚨"
+                        )
+                        break
+                    bbox_list = []
+                    results = model(img)
+                    # Bounding Box
+                    box = results.pandas().xyxy[0]
+                    class_list = box['class'].to_list()
+                    
+                    # read class.txt
+                    bytes_data = path_to_class_txt.getvalue()
+                    class_labels = bytes_data.decode('utf-8').split("\n")
+
+                    for i in box.index:
+                        xmin, ymin, xmax, ymax, conf = int(box['xmin'][i]), int(box['ymin'][i]), int(box['xmax'][i]), \
+                            int(box['ymax'][i]), box['confidence'][i]
+                        if conf > confidence:
+                            bbox_list.append([xmin, ymin, xmax, ymax])
+                    if len(bbox_list) != 0:
+                        for bbox, id in zip(bbox_list, class_list):
+                            plot_one_box(bbox, img, label=class_labels[id], color=[
+                                0, 0, 255], line_thickness=2)
+                    FRAME_WINDOW.image(img, channels='BGR')
+
+
+    # RTSP
+    if options == 'RTSP':
+        rtsp_url = st.sidebar.text_input(
+            'RTSP URL:',
+            'eg: rtsp://admin:name6666@198.162.1.58/cam/realmonitor?channel=0&subtype=0'
+        )
+        # st.sidebar.markdown('Press Enter after pasting RTSP URL')
+        url = rtsp_url[:-11]
+        rtsp_options = st.sidebar.selectbox(
+            'RTSP Channel',
+            ('Select Channel', '0', '1', '2', '3',
+                '4', '5', '6', '7', '8', '9', '10')
+        )
+
+        # Model
+        if gpu_option == 'CPU':
+            model = custom(path_or_model=path_model_file)
+        if gpu_option == 'GPU':
+            model = custom(path_or_model=path_model_file, gpu=True)
+
+        if not rtsp_options == 'Select Channel':
+            cap = cv2.VideoCapture(f'{url}{rtsp_options}&subtype=0')
+
             while True:
                 success, img = cap.read()
                 if not success:
                     st.error(
-                        f'Webcam channel {cam_options} NOT working\n \
-                        Change channel or Connect webcam properly!!',
+                        f'RSTP channel {rtsp_options} NOT working\nChange channel or Connect properly!!',
                         icon="🚨"
                     )
                     break
@@ -133,8 +199,11 @@ if options == 'Webcam':
                 # Bounding Box
                 box = results.pandas().xyxy[0]
                 class_list = box['class'].to_list()
-                f = open('class.txt', 'r').read()
-                class_labels = f.split("\n")
+                
+                # read class.txt
+                bytes_data = path_to_class_txt.getvalue()
+                class_labels = bytes_data.decode('utf-8').split("\n")
+
                 for i in box.index:
                     xmin, ymin, xmax, ymax, conf = int(box['xmin'][i]), int(box['ymin'][i]), int(box['xmax'][i]), \
                         int(box['ymax'][i]), box['confidence'][i]
@@ -145,53 +214,3 @@ if options == 'Webcam':
                         plot_one_box(bbox, img, label=class_labels[id], color=[
                             0, 0, 255], line_thickness=2)
                 FRAME_WINDOW.image(img, channels='BGR')
-
-
-# RTSP
-if options == 'RTSP':
-    rtsp_url = st.sidebar.text_input(
-        'RTSP URL:',
-        'eg: rtsp://admin:name6666@198.162.1.58/cam/realmonitor?channel=0&subtype=0'
-    )
-    # st.sidebar.markdown('Press Enter after pasting RTSP URL')
-    url = rtsp_url[:-11]
-    rtsp_options = st.sidebar.selectbox(
-        'RTSP Channel',
-        ('Select Channel', '0', '1', '2', '3',
-            '4', '5', '6', '7', '8', '9', '10')
-    )
-
-    # Model
-    if gpu_option == 'CPU':
-        model = custom(path_or_model=path_model_file)
-    if gpu_option == 'GPU':
-        model = custom(path_or_model=path_model_file, gpu=True)
-
-    if not rtsp_options == 'Select Channel':
-        cap = cv2.VideoCapture(f'{url}{rtsp_options}&subtype=0')
-
-        while True:
-            success, img = cap.read()
-            if not success:
-                st.error(
-                    f'RSTP channel {rtsp_options} NOT working\nChange channel or Connect properly!!',
-                    icon="🚨"
-                )
-                break
-            bbox_list = []
-            results = model(img)
-            # Bounding Box
-            box = results.pandas().xyxy[0]
-            class_list = box['class'].to_list()
-            f = open('class.txt', 'r').read()
-            class_labels = f.split("\n")
-            for i in box.index:
-                xmin, ymin, xmax, ymax, conf = int(box['xmin'][i]), int(box['ymin'][i]), int(box['xmax'][i]), \
-                    int(box['ymax'][i]), box['confidence'][i]
-                if conf > confidence:
-                    bbox_list.append([xmin, ymin, xmax, ymax])
-            if len(bbox_list) != 0:
-                for bbox, id in zip(bbox_list, class_list):
-                    plot_one_box(bbox, img, label=class_labels[id], color=[
-                        0, 0, 255], line_thickness=2)
-            FRAME_WINDOW.image(img, channels='BGR')
