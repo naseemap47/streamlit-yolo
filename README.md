@@ -8,6 +8,13 @@ Streamlit Server don't have GPU, so to deploy model, I used `deploy` branch (wit
 Only `master` contain all codes and details. (both **GPU** and **CPU** options)
 
 So better to clone `master` branch and run in your own system
+
+## Streamlit Options
+ - RTSP
+ - Webcam
+ - Video
+ - Image
+ ## StepUp
 ```
 git clone https://github.com/naseemap47/streamlit-yolov7.git
 cd streamlit-yolov7
