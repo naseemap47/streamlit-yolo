@@ -1,4 +1,7 @@
-# streamlit-yolov7
+# Streamlit YOLOv7
+<p align="center">
+ <img src="https://github.com/naseemap47/streamlit-yolov7/blob/master/sample.jpg">
+</p>
 Display predicted Video, Images and webcam using YOLOv7 model with Streamlit
 
 Streamlit Dashboard: https://naseemap47-streamlit-yolov7-app-deploy-bfr4xt.streamlitapp.com/
