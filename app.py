@@ -8,6 +8,19 @@ import tempfile
 from PIL import ImageColor
 import time
 from collections import Counter
+import json
+import psutil
+import subprocess
+
+
+def get_gpu_memory():
+    result = subprocess.check_output(
+        [
+            'nvidia-smi', '--query-gpu=memory.used',
+            '--format=csv,nounits,noheader'
+        ], encoding='utf-8')
+    gpu_memory = [int(x) for x in result.strip().split('\n')]
+    return gpu_memory[0]
 
 
 p_time = 0
@@ -111,11 +124,13 @@ if path_to_class_txt is not None:
             tfile = tempfile.NamedTemporaryFile(delete=False)
             tfile.write(upload_video_file.read())
             cap = cv2.VideoCapture(tfile.name)
-            success, img = cap.read()
             if pred:
                 FRAME_WINDOW.image([])
                 stframe = st.empty()
-                while success:
+                while True:
+                    success, img = cap.read()
+                    if not success:
+                        break
                     current_no_class = []
                     bbox_list = []
                     results = model(img)
@@ -146,61 +161,41 @@ if path_to_class_txt is not None:
                     
                     # Current number of classes
                     class_fq = dict(Counter(i for sub in current_no_class for i in set(sub)))
-                    class_fq = str(class_fq)
+                    class_fq = json.dumps(class_fq, indent = 4)
 
                     with stframe.container():
+                        # FRAME_WINDOW.image([])
                         st.subheader("Inference Stats")
                         kpi1, kpi2 = st.columns(2)
 
                         st.subheader("System Stats")
-                        js1, js2 = st.columns(2)
+                        js1, js2, js3 = st.columns(3)
 
                         # Updating Inference results
                         with kpi1:
                             st.markdown("**Frame Rate**")
                             kpi1_text = st.markdown(f"{round(fps, 4)}")
-                            # fps_warn = st.empty()
                         
                         with kpi2:
                             st.markdown("**Detected objects in curret Frame**")
-                            kpi2_text = st.markdown(f"{class_fq}")
-                        
-                        # with kpi3:
-                        #     st.markdown("**Total Detected objects**")
-                        #     kpi3_text = st.markdown("0")
-                        
+                            kpi2_text = st.json(f"{class_fq}")
+
+
                         # Updating System stats
-                        
-                        # with js1:
-                        #     st.markdown("**Memory usage**")
-                        #     js1_text = st.markdown("0")
+                        with js1:
+                            st.markdown("**Memory usage**")
+                            js1_text = st.write(str(psutil.virtual_memory()[2])+"%")
 
-                        # with js2:
-                        #     st.markdown("**CPU Usage**")
-                        #     js2_text = st.markdown("0")
+                        with js2:
+                            st.markdown("**CPU Usage**")
+                            js2_text = st.write(str(psutil.cpu_percent())+'%')
 
-                        # with js3:
-                        #     st.markdown("**GPU Memory Usage**")
-                        #     js3_text = st.markdown("0")
-
-                        # st.subheader("Inference Overview")
-                        # inf_ov_1, inf_ov_2, inf_ov_3, inf_ov_4 = st.columns(4)
-
-                        # with inf_ov_1:
-                        #     st.markdown("**Poor performing classes (Conf < {0})**".format(conf_thres_drift))
-                        #     inf_ov_1_text = st.markdown("0")
-                        
-                        # with inf_ov_2:
-                        #     st.markdown("**No. of poor peforming frames**")
-                        #     inf_ov_2_text = st.markdown("0")
-                        
-                        # with inf_ov_3:
-                        #     st.markdown("**Minimum FPS**")
-                        #     inf_ov_3_text = st.markdown("0")
-                        
-                        # with inf_ov_4:
-                        #     st.markdown("**Maximum FPS**")
-                        #     inf_ov_4_text = st.markdown("0")
+                        with js3:
+                            st.markdown("**GPU Memory Usage**")                    
+                            try:
+                                js3_text = st.write(str(get_gpu_memory())+' MB')
+                            except:
+                                js3_text = st.write(str('NA'))
 
 
 
@@ -310,21 +305,37 @@ if path_to_class_txt is not None:
                 
                 # Current number of classes
                 class_fq = dict(Counter(i for sub in current_no_class for i in set(sub)))
-                class_fq = str(class_fq)
+                class_fq = json.dumps(class_fq, indent = 4)
 
                 with stframe.container():
                     st.subheader("Inference Stats")
                     kpi1, kpi2 = st.columns(2)
 
                     st.subheader("System Stats")
-                    js1, js2 = st.columns(2)
+                    js1, js2, js3 = st.columns(3)
 
                     # Updating Inference results
                     with kpi1:
                         st.markdown("**Frame Rate**")
                         kpi1_text = st.markdown(f"{round(fps, 4)}")
-                        # fps_warn = st.empty()
                     
                     with kpi2:
                         st.markdown("**Detected objects in curret Frame**")
-                        kpi2_text = st.markdown(f"{class_fq}")
+                        kpi2_text = st.json(f"{class_fq}")
+
+
+                    # Updating System stats
+                    with js1:
+                        st.markdown("**Memory usage**")
+                        js1_text = st.write(str(psutil.virtual_memory()[2])+"%")
+
+                    with js2:
+                        st.markdown("**CPU Usage**")
+                        js2_text = st.write(str(psutil.cpu_percent())+'%')
+
+                    with js3:
+                        st.markdown("**GPU Memory Usage**")                    
+                        try:
+                            js3_text = st.write(str(get_gpu_memory())+' MB')
+                        except:
+                            js3_text = st.write(str('NA'))
