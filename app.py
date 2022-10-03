@@ -22,11 +22,10 @@ def get_gpu_memory():
     gpu_memory = [int(x) for x in result.strip().split('\n')]
     return gpu_memory[0]
 
-
 p_time = 0
 
 st.title('YOLOv7 Predictions')
-sample_img = cv2.imread('sample.jpg')
+sample_img = cv2.imread('logo.jpg')
 FRAME_WINDOW = st.image(sample_img, channels='BGR')
 st.sidebar.title('Settings')
 
@@ -88,8 +87,11 @@ if path_to_class_txt is not None:
                     model = custom(path_or_model=path_model_file)
                 if gpu_option == 'GPU':
                     model = custom(path_or_model=path_model_file, gpu=True)
+                
                 bbox_list = []
+                current_no_class = []
                 results = model(img)
+                
                 # Bounding Box
                 box = results.pandas().xyxy[0]
                 class_list = box['class'].to_list()
@@ -107,7 +109,20 @@ if path_to_class_txt is not None:
                     for bbox, id in zip(bbox_list, class_list):
                         plot_one_box(bbox, img, label=class_labels[id],
                                      color=color, line_thickness=draw_thick)
+                        current_no_class.append([class_labels[id]])
                 FRAME_WINDOW.image(img, channels='BGR')
+
+
+                # Current number of classes
+                class_fq = dict(Counter(i for sub in current_no_class for i in set(sub)))
+                class_fq = json.dumps(class_fq, indent = 4)
+            
+                st.subheader("Inference Stats")
+                kpi1 = st.columns(1)
+
+                # Updating Inference results
+                st.markdown("**Detected objects in curret Frame**")
+                kpi1 = st.json(f"{class_fq}")
 
     # Video
     if options == 'Video':
@@ -130,6 +145,11 @@ if path_to_class_txt is not None:
                 while True:
                     success, img = cap.read()
                     if not success:
+                        st.error(
+                            'Video file NOT working\n \
+                            Check Video path or file properly!!',
+                            icon="🚨"
+                        )
                         break
                     current_no_class = []
                     bbox_list = []
@@ -180,7 +200,6 @@ if path_to_class_txt is not None:
                             st.markdown("**Detected objects in curret Frame**")
                             kpi2_text = st.json(f"{class_fq}")
 
-
                         # Updating System stats
                         with js1:
                             st.markdown("**Memory usage**")
@@ -198,8 +217,6 @@ if path_to_class_txt is not None:
                                 js3_text = st.write(str('NA'))
 
 
-
-
     # Web-cam
     if options == 'Webcam':
         cam_options = st.sidebar.selectbox('Webcam Channel',
@@ -213,6 +230,7 @@ if path_to_class_txt is not None:
         if len(cam_options) != 0:
             if not cam_options == 'Select Channel':
                 cap = cv2.VideoCapture(int(cam_options))
+                stframe = st.empty()
                 while True:
                     success, img = cap.read()
                     if not success:
@@ -222,8 +240,11 @@ if path_to_class_txt is not None:
                             icon="🚨"
                         )
                         break
+
                     bbox_list = []
+                    current_no_class = []
                     results = model(img)
+                    
                     # Bounding Box
                     box = results.pandas().xyxy[0]
                     class_list = box['class'].to_list()
@@ -241,7 +262,51 @@ if path_to_class_txt is not None:
                         for bbox, id in zip(bbox_list, class_list):
                             plot_one_box(bbox, img, label=class_labels[id],
                                          color=color, line_thickness=draw_thick)
+                            current_no_class.append([class_labels[id]])
                     FRAME_WINDOW.image(img, channels='BGR')
+
+                    # FPS
+                    c_time = time.time()
+                    fps = 1 / (c_time - p_time)
+                    p_time = c_time
+                    
+                    # Current number of classes
+                    class_fq = dict(Counter(i for sub in current_no_class for i in set(sub)))
+                    class_fq = json.dumps(class_fq, indent = 4)
+
+                    with stframe.container():
+                        st.subheader("Inference Stats")
+                        kpi1, kpi2 = st.columns(2)
+
+                        st.subheader("System Stats")
+                        js1, js2, js3 = st.columns(3)
+
+                        # Updating Inference results
+                        with kpi1:
+                            st.markdown("**Frame Rate**")
+                            kpi1_text = st.markdown(f"{round(fps, 4)}")
+                        
+                        with kpi2:
+                            st.markdown("**Detected objects in curret Frame**")
+                            kpi2_text = st.json(f"{class_fq}")
+
+
+                        # Updating System stats
+                        with js1:
+                            st.markdown("**Memory usage**")
+                            js1_text = st.write(str(psutil.virtual_memory()[2])+"%")
+
+                        with js2:
+                            st.markdown("**CPU Usage**")
+                            js2_text = st.write(str(psutil.cpu_percent())+'%')
+
+                        with js3:
+                            st.markdown("**GPU Memory Usage**")                    
+                            try:
+                                js3_text = st.write(str(get_gpu_memory())+' MB')
+                            except:
+                                js3_text = st.write(str('NA'))
+
 
     # RTSP
     if options == 'RTSP':
@@ -274,9 +339,11 @@ if path_to_class_txt is not None:
                         icon="🚨"
                     )
                     break
+
                 bbox_list = []
                 current_no_class = []
                 results = model(img)
+                
                 # Bounding Box
                 box = results.pandas().xyxy[0]
                 class_list = box['class'].to_list()
@@ -296,7 +363,6 @@ if path_to_class_txt is not None:
                                      color=color, line_thickness=draw_thick)
                         current_no_class.append([class_labels[id]])
                 FRAME_WINDOW.image(img, channels='BGR')
-
 
                 # FPS
                 c_time = time.time()
@@ -322,7 +388,6 @@ if path_to_class_txt is not None:
                     with kpi2:
                         st.markdown("**Detected objects in curret Frame**")
                         kpi2_text = st.json(f"{class_fq}")
-
 
                     # Updating System stats
                     with js1:
