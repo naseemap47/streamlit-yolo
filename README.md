@@ -1,6 +1,6 @@
 # Streamlit YOLOv7
 <p align="center">
- <img src="https://github.com/naseemap47/streamlit-yolov7/blob/master/sample.jpg">
+ <img src="https://github.com/naseemap47/streamlit-yolov7/blob/master/logo.jpg">
 </p>
 Display predicted Video, Images and webcam using YOLOv7 model with Streamlit
 
