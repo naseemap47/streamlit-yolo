@@ -6,7 +6,11 @@ from utils.plots import plot_one_box
 import numpy as np
 import tempfile
 from PIL import ImageColor
+import time
+from collections import Counter
 
+
+p_time = 0
 
 st.title('YOLOv7 Predictions')
 sample_img = cv2.imread('sample.jpg')
@@ -109,7 +113,10 @@ if path_to_class_txt is not None:
             cap = cv2.VideoCapture(tfile.name)
             success, img = cap.read()
             if pred:
+                FRAME_WINDOW.image([])
+                stframe = st.empty()
                 while success:
+                    current_no_class = []
                     bbox_list = []
                     results = model(img)
                     # Bounding Box
@@ -129,7 +136,74 @@ if path_to_class_txt is not None:
                         for bbox, id in zip(bbox_list, class_list):
                             plot_one_box(bbox, img, label=class_labels[id],
                                          color=color, line_thickness=draw_thick)
+                            current_no_class.append([class_labels[id]])
                     FRAME_WINDOW.image(img, channels='BGR')
+                    
+                    # FPS
+                    c_time = time.time()
+                    fps = 1 / (c_time - p_time)
+                    p_time = c_time
+                    
+                    # Current number of classes
+                    class_fq = dict(Counter(i for sub in current_no_class for i in set(sub)))
+                    class_fq = str(class_fq)
+
+                    with stframe.container():
+                        st.subheader("Inference Stats")
+                        kpi1, kpi2 = st.columns(2)
+
+                        st.subheader("System Stats")
+                        js1, js2 = st.columns(2)
+
+                        # Updating Inference results
+                        with kpi1:
+                            st.markdown("**Frame Rate**")
+                            kpi1_text = st.markdown(f"{round(fps, 4)}")
+                            # fps_warn = st.empty()
+                        
+                        with kpi2:
+                            st.markdown("**Detected objects in curret Frame**")
+                            kpi2_text = st.markdown(f"{class_fq}")
+                        
+                        # with kpi3:
+                        #     st.markdown("**Total Detected objects**")
+                        #     kpi3_text = st.markdown("0")
+                        
+                        # Updating System stats
+                        
+                        # with js1:
+                        #     st.markdown("**Memory usage**")
+                        #     js1_text = st.markdown("0")
+
+                        # with js2:
+                        #     st.markdown("**CPU Usage**")
+                        #     js2_text = st.markdown("0")
+
+                        # with js3:
+                        #     st.markdown("**GPU Memory Usage**")
+                        #     js3_text = st.markdown("0")
+
+                        # st.subheader("Inference Overview")
+                        # inf_ov_1, inf_ov_2, inf_ov_3, inf_ov_4 = st.columns(4)
+
+                        # with inf_ov_1:
+                        #     st.markdown("**Poor performing classes (Conf < {0})**".format(conf_thres_drift))
+                        #     inf_ov_1_text = st.markdown("0")
+                        
+                        # with inf_ov_2:
+                        #     st.markdown("**No. of poor peforming frames**")
+                        #     inf_ov_2_text = st.markdown("0")
+                        
+                        # with inf_ov_3:
+                        #     st.markdown("**Minimum FPS**")
+                        #     inf_ov_3_text = st.markdown("0")
+                        
+                        # with inf_ov_4:
+                        #     st.markdown("**Maximum FPS**")
+                        #     inf_ov_4_text = st.markdown("0")
+
+
+
 
     # Web-cam
     if options == 'Webcam':
@@ -196,7 +270,7 @@ if path_to_class_txt is not None:
 
         if not rtsp_options == 'Select Channel':
             cap = cv2.VideoCapture(f'{url}{rtsp_options}&subtype=0')
-
+            stframe = st.empty()
             while True:
                 success, img = cap.read()
                 if not success:
@@ -206,6 +280,7 @@ if path_to_class_txt is not None:
                     )
                     break
                 bbox_list = []
+                current_no_class = []
                 results = model(img)
                 # Bounding Box
                 box = results.pandas().xyxy[0]
@@ -224,4 +299,32 @@ if path_to_class_txt is not None:
                     for bbox, id in zip(bbox_list, class_list):
                         plot_one_box(bbox, img, label=class_labels[id],
                                      color=color, line_thickness=draw_thick)
+                        current_no_class.append([class_labels[id]])
                 FRAME_WINDOW.image(img, channels='BGR')
+
+
+                # FPS
+                c_time = time.time()
+                fps = 1 / (c_time - p_time)
+                p_time = c_time
+                
+                # Current number of classes
+                class_fq = dict(Counter(i for sub in current_no_class for i in set(sub)))
+                class_fq = str(class_fq)
+
+                with stframe.container():
+                    st.subheader("Inference Stats")
+                    kpi1, kpi2 = st.columns(2)
+
+                    st.subheader("System Stats")
+                    js1, js2 = st.columns(2)
+
+                    # Updating Inference results
+                    with kpi1:
+                        st.markdown("**Frame Rate**")
+                        kpi1_text = st.markdown(f"{round(fps, 4)}")
+                        # fps_warn = st.empty()
+                    
+                    with kpi2:
+                        st.markdown("**Detected objects in curret Frame**")
+                        kpi2_text = st.markdown(f"{class_fq}")
