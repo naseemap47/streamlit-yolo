@@ -22,6 +22,12 @@ def get_gpu_memory():
     gpu_memory = [int(x) for x in result.strip().split('\n')]
     return gpu_memory[0]
 
+def color_picker_fn(classname, key):
+    color_picke = st.sidebar.color_picker(f'{classname}:', '#ff0003', key=key)
+    color_rgb_list = list(ImageColor.getcolor(str(color_picke), "RGB"))
+    color = [color_rgb_list[2], color_rgb_list[1], color_rgb_list[0]]
+    return color
+
 p_time = 0
 
 st.title('YOLOv7 Predictions')
@@ -65,11 +71,16 @@ if path_to_class_txt is not None:
         'Draw Thickness:', min_value=1,
         max_value=20, value=3
     )
+    
+    # read class.txt
+    bytes_data = path_to_class_txt.getvalue()
+    class_labels = bytes_data.decode('utf-8').split("\n")
+    color_pick_list = []
 
-    # Color picker
-    color_picke = st.sidebar.color_picker('Draw Color:', '#ff0003')
-    color_rgb_list = list(ImageColor.getcolor(str(color_picke), "RGB"))
-    color = [color_rgb_list[1], color_rgb_list[2], color_rgb_list[0]]
+    for i in range(len(class_labels)):
+        classname = class_labels[i]
+        color = color_picker_fn(classname, i)
+        color_pick_list.append(color)
 
     # Image
     if options == 'Image':
@@ -96,10 +107,6 @@ if path_to_class_txt is not None:
                 box = results.pandas().xyxy[0]
                 class_list = box['class'].to_list()
 
-                # read class.txt
-                bytes_data = path_to_class_txt.getvalue()
-                class_labels = bytes_data.decode('utf-8').split("\n")
-
                 for i in box.index:
                     xmin, ymin, xmax, ymax, conf = int(box['xmin'][i]), int(box['ymin'][i]), int(box['xmax'][i]), \
                         int(box['ymax'][i]), box['confidence'][i]
@@ -108,7 +115,7 @@ if path_to_class_txt is not None:
                 if len(bbox_list) != 0:
                     for bbox, id in zip(bbox_list, class_list):
                         plot_one_box(bbox, img, label=class_labels[id],
-                                     color=color, line_thickness=draw_thick)
+                                     color=color_pick_list[id], line_thickness=draw_thick)
                         current_no_class.append([class_labels[id]])
                 FRAME_WINDOW.image(img, channels='BGR')
 
@@ -158,10 +165,6 @@ if path_to_class_txt is not None:
                     box = results.pandas().xyxy[0]
                     class_list = box['class'].to_list()
 
-                    # read class.txt
-                    bytes_data = path_to_class_txt.getvalue()
-                    class_labels = bytes_data.decode('utf-8').split("\n")
-
                     for i in box.index:
                         xmin, ymin, xmax, ymax, conf = int(box['xmin'][i]), int(box['ymin'][i]), int(box['xmax'][i]), \
                             int(box['ymax'][i]), box['confidence'][i]
@@ -170,7 +173,7 @@ if path_to_class_txt is not None:
                     if len(bbox_list) != 0:
                         for bbox, id in zip(bbox_list, class_list):
                             plot_one_box(bbox, img, label=class_labels[id],
-                                         color=color, line_thickness=draw_thick)
+                                         color=color_pick_list[id], line_thickness=draw_thick)
                             current_no_class.append([class_labels[id]])
                     FRAME_WINDOW.image(img, channels='BGR')
                     
@@ -249,10 +252,6 @@ if path_to_class_txt is not None:
                     box = results.pandas().xyxy[0]
                     class_list = box['class'].to_list()
 
-                    # read class.txt
-                    bytes_data = path_to_class_txt.getvalue()
-                    class_labels = bytes_data.decode('utf-8').split("\n")
-
                     for i in box.index:
                         xmin, ymin, xmax, ymax, conf = int(box['xmin'][i]), int(box['ymin'][i]), int(box['xmax'][i]), \
                             int(box['ymax'][i]), box['confidence'][i]
@@ -261,7 +260,7 @@ if path_to_class_txt is not None:
                     if len(bbox_list) != 0:
                         for bbox, id in zip(bbox_list, class_list):
                             plot_one_box(bbox, img, label=class_labels[id],
-                                         color=color, line_thickness=draw_thick)
+                                         color=color_pick_list[id], line_thickness=draw_thick)
                             current_no_class.append([class_labels[id]])
                     FRAME_WINDOW.image(img, channels='BGR')
 
@@ -348,10 +347,6 @@ if path_to_class_txt is not None:
                 box = results.pandas().xyxy[0]
                 class_list = box['class'].to_list()
 
-                # read class.txt
-                bytes_data = path_to_class_txt.getvalue()
-                class_labels = bytes_data.decode('utf-8').split("\n")
-
                 for i in box.index:
                     xmin, ymin, xmax, ymax, conf = int(box['xmin'][i]), int(box['ymin'][i]), int(box['xmax'][i]), \
                         int(box['ymax'][i]), box['confidence'][i]
@@ -360,7 +355,7 @@ if path_to_class_txt is not None:
                 if len(bbox_list) != 0:
                     for bbox, id in zip(bbox_list, class_list):
                         plot_one_box(bbox, img, label=class_labels[id],
-                                     color=color, line_thickness=draw_thick)
+                                     color=color_pick_list[id], line_thickness=draw_thick)
                         current_no_class.append([class_labels[id]])
                 FRAME_WINDOW.image(img, channels='BGR')
 
