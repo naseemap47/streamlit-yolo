@@ -69,7 +69,7 @@ if path_to_class_txt is not None:
     # Color picker
     color_picke = st.sidebar.color_picker('Draw Color:', '#ff0003')
     color_rgb_list = list(ImageColor.getcolor(str(color_picke), "RGB"))
-    color = [color_rgb_list[1], color_rgb_list[2], color_rgb_list[0]]
+    color = [color_rgb_list[2], color_rgb_list[1], color_rgb_list[0]]
 
     # Image
     if options == 'Image':
