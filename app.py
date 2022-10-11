@@ -11,6 +11,7 @@ from collections import Counter
 import json
 import psutil
 import subprocess
+import pandas as pd
 
 
 def get_gpu_memory():
@@ -367,7 +368,9 @@ if path_to_class_txt is not None:
                 # Current number of classes
                 class_fq = dict(Counter(i for sub in current_no_class for i in set(sub)))
                 class_fq = json.dumps(class_fq, indent = 4)
-
+                class_fq = json.loads(class_fq)
+                df_fq = pd.DataFrame(class_fq.items(), columns=['Class', 'Number'])
+                # print(df_fq)
                 with stframe.container():
                     st.subheader("Inference Stats")
                     kpi1, kpi2 = st.columns(2)
@@ -382,7 +385,8 @@ if path_to_class_txt is not None:
                     
                     with kpi2:
                         st.markdown("**Detected objects in curret Frame**")
-                        kpi2_text = st.json(f"{class_fq}")
+                        # kpi2_text = st.json(f"{class_fq}")
+                        kpi2_text = st.dataframe(df_fq, use_container_width=True)
 
                     # Updating System stats
                     with js1:
