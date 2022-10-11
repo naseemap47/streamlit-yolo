@@ -330,7 +330,9 @@ if path_to_class_txt is not None:
 
         if not rtsp_options == 'Select Channel':
             cap = cv2.VideoCapture(f'{url}{rtsp_options}&subtype=0')
-            stframe = st.empty()
+            stframe1 = st.empty()
+            stframe2 = st.empty()
+            stframe3 = st.empty()
             while True:
                 success, img = cap.read()
                 if not success:
@@ -370,36 +372,43 @@ if path_to_class_txt is not None:
                 class_fq = json.dumps(class_fq, indent = 4)
                 class_fq = json.loads(class_fq)
                 df_fq = pd.DataFrame(class_fq.items(), columns=['Class', 'Number'])
-                # print(df_fq)
-                with stframe.container():
-                    st.subheader("Inference Stats")
-                    kpi1, kpi2 = st.columns(2)
+                
+                # Updating Inference results
+                with stframe1.container():
+                    st.markdown("<h2>Inference Statistics</h2>", unsafe_allow_html=True)
+                    if round(fps, 4)>1:
+                        st.markdown(f"<h4 style='color:green;'>Frame Rate: {round(fps, 4)}</h4>", unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"<h4 style='color:red;'>Frame Rate: {round(fps, 4)}</h4>", unsafe_allow_html=True)
+                
+                with stframe2.container():
+                    st.markdown("<h3>Detected objects in curret Frame</h3>", unsafe_allow_html=True)
+                    st.dataframe(df_fq, use_container_width=True)
 
-                    st.subheader("System Stats")
-                    js1, js2, js3 = st.columns(3)
-
-                    # Updating Inference results
-                    with kpi1:
-                        st.markdown("**Frame Rate**")
-                        kpi1_text = st.markdown(f"{round(fps, 4)}")
-                    
-                    with kpi2:
-                        st.markdown("**Detected objects in curret Frame**")
-                        # kpi2_text = st.json(f"{class_fq}")
-                        kpi2_text = st.dataframe(df_fq, use_container_width=True)
+                with stframe3.container():
+                    st.markdown("<h2>System Statistics</h2>", unsafe_allow_html=True)
+                    js1, js2, js3 = st.columns(3)                       
 
                     # Updating System stats
                     with js1:
-                        st.markdown("**Memory usage**")
-                        js1_text = st.write(str(psutil.virtual_memory()[2])+"%")
+                        st.markdown("<h4>Memory usage</h4>", unsafe_allow_html=True)
+                        mem_use = psutil.virtual_memory()[2]
+                        if mem_use > 50:
+                            js1_text = st.markdown(f"<h5 style='color:red;'>{mem_use} %</h5>", unsafe_allow_html=True)
+                        else:
+                            js1_text = st.markdown(f"<h5 style='color:green;'>{mem_use} %</h5>", unsafe_allow_html=True)
 
                     with js2:
-                        st.markdown("**CPU Usage**")
-                        js2_text = st.write(str(psutil.cpu_percent())+'%')
+                        st.markdown("<h4>CPU Usage</h4>", unsafe_allow_html=True)
+                        cpu_use = psutil.cpu_percent()
+                        if mem_use > 50:
+                            js2_text = st.markdown(f"<h5 style='color:red;'>{cpu_use} %</h5>", unsafe_allow_html=True)
+                        else:
+                            js2_text = st.markdown(f"<h5 style='color:green;'>{cpu_use} %</h5>", unsafe_allow_html=True)
 
                     with js3:
-                        st.markdown("**GPU Memory Usage**")                    
+                        st.markdown("<h4>GPU Memory Usage</h4>", unsafe_allow_html=True)  
                         try:
-                            js3_text = st.write(str(get_gpu_memory())+' MB')
+                            js3_text = st.markdown(f'<h5>{get_gpu_memory()} MB</h5>', unsafe_allow_html=True)
                         except:
-                            js3_text = st.write(str('NA'))
+                            js3_text = st.markdown('<h5>NA</h5>', unsafe_allow_html=True)
