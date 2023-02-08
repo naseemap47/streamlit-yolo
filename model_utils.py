@@ -1,18 +1,4 @@
-import streamlit as st
-import cv2
-import torch
-from utils.hubconf import custom
 from utils.plots import plot_one_box
-import numpy as np
-import tempfile
-from PIL import ImageColor
-import time
-from collections import Counter
-import json
-import psutil
-import subprocess
-import pandas as pd
-from ultralytics import YOLO
 
 
 def get_yolo(img, model_type, model, confidence, color_pick_list, class_list, draw_thick):

@@ -2,7 +2,6 @@ import streamlit as st
 import cv2
 import torch
 from utils.hubconf import custom
-from utils.plots import plot_one_box
 import numpy as np
 import tempfile
 from PIL import ImageColor
