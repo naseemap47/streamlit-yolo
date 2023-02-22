@@ -23,6 +23,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/streamlit-yolo:latest,
-            ${{ secrets.DOCKERHUB_USERNAME }}/streamlit-yolo:0.1
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/streamlit-yolo:latest
