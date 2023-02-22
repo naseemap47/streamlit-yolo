@@ -9,4 +9,5 @@ RUN apt-get update && \
     libsm6 \
     libxext6
 RUN pip install -r /home/requirements.txt
-CMD [ "streamlit", "run", "/home/app.py" ]
+WORKDIR /home
+CMD [ "streamlit", "run", "app.py" ]
