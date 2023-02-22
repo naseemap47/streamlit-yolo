@@ -1,18 +1,14 @@
-# Streamlit YOLOv7
-<p align="center">
- <img src="https://github.com/naseemap47/streamlit-yolov7/blob/master/logo.jpg">
-</p>
-Display predicted Video, Images and webcam using YOLOv7 model with Streamlit
+# YOLO Streamlit Dashbord
+Display predicted Video, Images and webcam using YOLO models (**YOLOv7** & **YOLOv8**) with Streamlit
 
+### Sample Streamlit YOLOv7 Dashboard
 Streamlit Dashboard: https://naseemap47-streamlit-yolov7-app-deploy-bfr4xt.streamlitapp.com/
 
-Streamlit Server don't have GPU, so to deploy model, I used `deploy` branch (without **GPU** option)
-
-Only `master` contain all codes and details. (both **GPU** and **CPU** options)
-
-So better to clone `master` branch and run in your own system
+## 🚀 New Update (10/02/2023)
+Integrated new YOLOv8 model, now you can run YOLOv8 model on RTSP, Webcam, Video and Image
 
 ## Streamlit Options
+### Modes
  - RTSP
  - Webcam
  - Video
@@ -35,3 +31,4 @@ Run **Streamlit**
 ```
 streamlit run app.py
 ```
+
