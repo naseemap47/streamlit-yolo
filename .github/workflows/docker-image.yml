@@ -20,7 +20,7 @@ jobs:
     - name: Build and Push Docker image
       uses: docker/build-push-action@v4
       with:
-          context: .
-          file: Dockerfile
+          context: docker
+          file: docker/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/streamlit-yolo:latest
