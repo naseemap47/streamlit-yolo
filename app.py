@@ -23,6 +23,7 @@ model_type = st.sidebar.selectbox(
 st.title(f'{model_type} Predictions')
 sample_img = cv2.imread('logo.jpg')
 FRAME_WINDOW = st.image(sample_img, channels='BGR')
+cap = None
 
 if not model_type == 'YOLO Model':
     path_model_file = st.sidebar.text_input(
@@ -103,86 +104,28 @@ if not model_type == 'YOLO Model':
                         st.markdown("<h2>Inference Statistics</h2>", unsafe_allow_html=True)
                         st.markdown("<h3>Detected objects in curret Frame</h3>", unsafe_allow_html=True)
                         st.dataframe(df_fq, use_container_width=True)
-
+        
         # Video
         if options == 'Video':
             upload_video_file = st.sidebar.file_uploader(
                 'Upload Video', type=['mp4', 'avi', 'mkv'])
             if upload_video_file is not None:
-                pred = st.checkbox('Predict Using YOLOv7')
+                pred = st.checkbox(f'Predict Using {model_type}')
 
                 tfile = tempfile.NamedTemporaryFile(delete=False)
                 tfile.write(upload_video_file.read())
                 cap = cv2.VideoCapture(tfile.name)
-                if pred:
-                    FRAME_WINDOW.image([])
-                    stframe1 = st.empty()
-                    stframe2 = st.empty()
-                    stframe3 = st.empty()
-                    while True:
-                        success, img = cap.read()
-                        if not success:
-                            st.error(
-                                'Video file NOT working\n \
-                                Check Video path or file properly!!',
-                                icon="🚨"
-                            )
-                            break
-                        img, current_no_class = get_yolo(img, model_type, model, confidence, color_pick_list, class_labels, draw_thick)
-                        FRAME_WINDOW.image(img, channels='BGR')
-                        
-                        # FPS
-                        c_time = time.time()
-                        fps = 1 / (c_time - p_time)
-                        p_time = c_time
-                        
-                        # Current number of classes
-                        class_fq = dict(Counter(i for sub in current_no_class for i in set(sub)))
-                        class_fq = json.dumps(class_fq, indent = 4)
-                        class_fq = json.loads(class_fq)
-                        df_fq = pd.DataFrame(class_fq.items(), columns=['Class', 'Number'])
-                        
-                        # Updating Inference results
-                        get_system_stat(stframe1, stframe2, stframe3, fps, df_fq)
+                # if pred:
 
 
         # Web-cam
         if options == 'Webcam':
             cam_options = st.sidebar.selectbox('Webcam Channel',
                                             ('Select Channel', '0', '1', '2', '3'))
-
-            if len(cam_options) != 0:
-                if not cam_options == 'Select Channel':
-                    cap = cv2.VideoCapture(int(cam_options))
-                    stframe1 = st.empty()
-                    stframe2 = st.empty()
-                    stframe3 = st.empty()
-                    while True:
-                        success, img = cap.read()
-                        if not success:
-                            st.error(
-                                f'Webcam channel {cam_options} NOT working\n \
-                                Change channel or Connect webcam properly!!',
-                                icon="🚨"
-                            )
-                            break
-
-                        img, current_no_class = get_yolo(img, model_type, model, confidence, color_pick_list, class_labels, draw_thick)
-                        FRAME_WINDOW.image(img, channels='BGR')
-
-                        # FPS
-                        c_time = time.time()
-                        fps = 1 / (c_time - p_time)
-                        p_time = c_time
-                        
-                        # Current number of classes
-                        class_fq = dict(Counter(i for sub in current_no_class for i in set(sub)))
-                        class_fq = json.dumps(class_fq, indent = 4)
-                        class_fq = json.loads(class_fq)
-                        df_fq = pd.DataFrame(class_fq.items(), columns=['Class', 'Number'])
-                        
-                        # Updating Inference results
-                        get_system_stat(stframe1, stframe2, stframe3, fps, df_fq)
+        
+            if not cam_options == 'Select Channel':
+                pred = st.checkbox(f'Predict Using {model_type}')
+                cap = cv2.VideoCapture(int(cam_options))
 
 
         # RTSP
@@ -200,32 +143,36 @@ if not model_type == 'YOLO Model':
             )
 
             if not rtsp_options == 'Select Channel':
+                pred = st.checkbox(f'Predict Using {model_type}')
                 cap = cv2.VideoCapture(f'{url}{rtsp_options}&subtype=0')
-                stframe1 = st.empty()
-                stframe2 = st.empty()
-                stframe3 = st.empty()
-                while True:
-                    success, img = cap.read()
-                    if not success:
-                        st.error(
-                            f'RSTP channel {rtsp_options} NOT working\nChange channel or Connect properly!!',
-                            icon="🚨"
-                        )
-                        break
 
-                    img, current_no_class = get_yolo(img, model_type, model, confidence, color_pick_list, class_labels, draw_thick)
-                    FRAME_WINDOW.image(img, channels='BGR')
 
-                    # FPS
-                    c_time = time.time()
-                    fps = 1 / (c_time - p_time)
-                    p_time = c_time
-                    
-                    # Current number of classes
-                    class_fq = dict(Counter(i for sub in current_no_class for i in set(sub)))
-                    class_fq = json.dumps(class_fq, indent = 4)
-                    class_fq = json.loads(class_fq)
-                    df_fq = pd.DataFrame(class_fq.items(), columns=['Class', 'Number'])
-                    
-                    # Updating Inference results
-                    get_system_stat(stframe1, stframe2, stframe3, fps, df_fq)
+if (cap != None) and pred:
+    stframe1 = st.empty()
+    stframe2 = st.empty()
+    stframe3 = st.empty()
+    while True:
+        success, img = cap.read()
+        if not success:
+            st.error(
+                f'RSTP channel {rtsp_options} NOT working\nChange channel or Connect properly!!',
+                icon="🚨"
+            )
+            break
+
+        img, current_no_class = get_yolo(img, model_type, model, confidence, color_pick_list, class_labels, draw_thick)
+        FRAME_WINDOW.image(img, channels='BGR')
+
+        # FPS
+        c_time = time.time()
+        fps = 1 / (c_time - p_time)
+        p_time = c_time
+        
+        # Current number of classes
+        class_fq = dict(Counter(i for sub in current_no_class for i in set(sub)))
+        class_fq = json.dumps(class_fq, indent = 4)
+        class_fq = json.loads(class_fq)
+        df_fq = pd.DataFrame(class_fq.items(), columns=['Class', 'Number'])
+        
+        # Updating Inference results
+        get_system_stat(stframe1, stframe2, stframe3, fps, df_fq)
