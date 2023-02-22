@@ -134,17 +134,8 @@ if not model_type == 'YOLO Model':
                 'RTSP URL:',
                 'eg: rtsp://admin:name6666@198.162.1.58/cam/realmonitor?channel=0&subtype=0'
             )
-            # st.sidebar.markdown('Press Enter after pasting RTSP URL')
-            url = rtsp_url[:-11]
-            rtsp_options = st.sidebar.selectbox(
-                'RTSP Channel',
-                ('Select Channel', '0', '1', '2', '3',
-                    '4', '5', '6', '7', '8', '9', '10')
-            )
-
-            if not rtsp_options == 'Select Channel':
-                pred = st.checkbox(f'Predict Using {model_type}')
-                cap = cv2.VideoCapture(f'{url}{rtsp_options}&subtype=0')
+            pred = st.checkbox(f'Predict Using {model_type}')
+            cap = cv2.VideoCapture(rtsp_url)
 
 
 if (cap != None) and pred:
@@ -155,7 +146,7 @@ if (cap != None) and pred:
         success, img = cap.read()
         if not success:
             st.error(
-                f'RSTP channel {rtsp_options} NOT working\nChange channel or Connect properly!!',
+                f"{options} NOT working\nCheck {options} properly!!",
                 icon="🚨"
             )
             break
