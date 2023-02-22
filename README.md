@@ -4,6 +4,22 @@ Display predicted Video, Images and webcam using YOLO models (**YOLOv7** & **YOL
 ### Sample Streamlit YOLOv7 Dashboard
 Streamlit Dashboard: https://naseemap47-streamlit-yolov7-app-deploy-bfr4xt.streamlitapp.com/
 
+## Docker
+dockerhub: https://hub.docker.com/repository/docker/naseemap47/streamlit-yolo
+
+#### 1. Pull Docker Image
+```
+docker pull naseemap47/streamlit-yolo
+```
+#### 2. Change permistion
+```
+sudo xhost +si:localuser:root
+```
+#### 3. RUN Docker Image
+```
+docker run --gpus all -e DISPLAY=$DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix --ipc=host --device=/dev/video0:/dev/video0 -p 8502 -it --rm naseemap47/streamlit-yolo
+```
+
 ## 🚀 New Update (10/02/2023)
 Integrated new YOLOv8 model, now you can run YOLOv8 model on RTSP, Webcam, Video and Image
 
