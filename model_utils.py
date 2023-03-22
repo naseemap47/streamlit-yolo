@@ -24,7 +24,7 @@ def color_picker_fn(classname, key):
 def get_yolo(img, model_type, model, confidence, color_pick_list, class_list, draw_thick):
     current_no_class = []
     results = model(img)
-    if model_type == 'YOLOv7':
+    if model_type == 'YOLOv5':
         box = results.pandas().xyxy[0]
 
         for i in box.index:
@@ -32,7 +32,7 @@ def get_yolo(img, model_type, model, confidence, color_pick_list, class_list, dr
                 int(box['ymax'][i]), box['confidence'][i], box['class'][i], box['name'][i]
             if conf > confidence:
                 plot_one_box([xmin, ymin, xmax, ymax], img, label=class_name,
-                                color=color_pick_list[id], line_thickness=draw_thick)
+                                color=color_pick_list[id], line_thickness=draw_thick, confi=conf)
             current_no_class.append([class_name])
 
     if model_type == 'YOLOv8':
@@ -47,7 +47,7 @@ def get_yolo(img, model_type, model, confidence, color_pick_list, class_list, dr
                 ymax = int(bbox[3])
                 if cnf > confidence:
                     plot_one_box([xmin, ymin, xmax, ymax], img, label=class_list[int(cs)],
-                                    color=color_pick_list[int(cs)], line_thickness=draw_thick)
+                                    color=color_pick_list[int(cs)], line_thickness=draw_thick, confi=cnf)
                     current_no_class.append([class_list[int(cs)]])
     return img, current_no_class
 

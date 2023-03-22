@@ -11,17 +11,25 @@ import pandas as pd
 from model_utils import get_yolo, color_picker_fn, get_system_stat
 from ultralytics import YOLO
 
+#페이지 기본 설정
+st.set_page_config(
+    page_icon='🐤',
+    page_title='Bird or Drone')
 
+#페이지 헤더, 서브헤더 제목 설정
+st.header("데이터를 보여조🧐")
+st.subheader("Bird🐤 or Drone🛸")
 p_time = 0
 
 st.sidebar.title('Settings')
 # Choose the model
 model_type = st.sidebar.selectbox(
-    'Choose YOLO Model', ('YOLO Model', 'YOLOv8', 'YOLOv7')
+    'Choose YOLO Model', ('YOLO Model', 'YOLOv8', 'YOLO v5')
 )
 
+# #background image
 st.title(f'{model_type} Predictions')
-sample_img = cv2.imread('logo.jpg')
+sample_img = cv2.imread('yolo_logo.png')
 FRAME_WINDOW = st.image(sample_img, channels='BGR')
 cap = None
 
@@ -32,8 +40,8 @@ if not model_type == 'YOLO Model':
     )
     if st.sidebar.checkbox('Load Model'):
         
-        # YOLOv7 Model
-        if model_type == 'YOLOv7':
+        # YOLOv5 Model
+        if model_type == 'YOLOv5':
             # GPU
             gpu_option = st.sidebar.radio(
                 'PU Options:', ('CPU', 'GPU'))
@@ -50,6 +58,7 @@ if not model_type == 'YOLO Model':
                 model = custom(path_or_model=path_model_file)
             if gpu_option == 'GPU':
                 model = custom(path_or_model=path_model_file, gpu=True)
+
 
         # YOLOv8 Model
         if model_type == 'YOLOv8':
