@@ -176,3 +176,4 @@ if (cap != None) and pred:
         
         # Updating Inference results
         get_system_stat(stframe1, stframe2, stframe3, fps, df_fq)
+        
