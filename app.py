@@ -34,10 +34,33 @@ FRAME_WINDOW = st.image(sample_img, channels='BGR')
 cap = None
 
 if not model_type == 'YOLO Model':
-    path_model_file = st.sidebar.text_input(
-        f'path to {model_type} Model:',
-        f'eg: dir/{model_type}.pt'
-    )
+    # path_model_file = st.sidebar.text_input(
+    #     f'path to {model_type} Model:',
+    #     f'eg: dir/{model_type}.pt'
+    # )
+
+    from pathlib import Path
+    import sys
+
+    # Get the absolute path of the current file
+    file_path = Path(__file__).resolve()
+
+    # Get the parent directory of the current file
+    root_path = file_path.parent
+
+    # Add the root path to the sys.path list if it is not already there
+    if root_path not in sys.path:
+        sys.path.append(str(root_path))
+
+    # Get the relative path of the root directory with respect to the current working directory
+    ROOT = root_path.relative_to(Path.cwd())
+
+    # model
+    MODEL_DIR = ROOT / 'weights'
+    DETECTION_MODEL = MODEL_DIR / 'v5n.200.pt'
+    model_path = Path(DETECTION_MODEL)
+
+
     if st.sidebar.checkbox('Load Model'):
         
         # YOLOv5 Model
@@ -59,10 +82,9 @@ if not model_type == 'YOLO Model':
             if gpu_option == 'GPU':
                 model = custom(path_or_model=path_model_file, gpu=True)
 
-
         # YOLOv8 Model
         if model_type == 'YOLOv8':
-            model = YOLO(path_model_file)
+            model = YOLO(model_path)
 
         # Load Class names
         class_labels = model.names
@@ -176,4 +198,3 @@ if (cap != None) and pred:
         
         # Updating Inference results
         get_system_stat(stframe1, stframe2, stframe3, fps, df_fq)
-        
