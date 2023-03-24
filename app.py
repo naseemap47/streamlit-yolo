@@ -13,7 +13,6 @@ from ultralytics import YOLO
 #import pafy
 from pathlib import Path
 import sys
-from streamlit_player import st_player
 
 
 #페이지 기본 설정
