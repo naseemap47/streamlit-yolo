@@ -10,7 +10,7 @@ import json
 import pandas as pd
 from model_utils import get_yolo, color_picker_fn, get_system_stat
 from ultralytics import YOLO
-import pafy
+#import pafy
 from pathlib import Path
 import sys
 from streamlit_player import st_player
@@ -83,7 +83,7 @@ if not model_type == 'YOLO Model':
 
         # Inference Mode
         options = st.sidebar.radio(
-            'Options:', ('Webcam', 'Image', 'Video', 'RTSP', 'Youtube'), index=1)
+            'Options:', ('Webcam', 'Image', 'Video', 'RTSP'), index=1)
 
         # Confidence
         confidence = st.sidebar.slider(
@@ -160,17 +160,17 @@ if not model_type == 'YOLO Model':
             pred = st.checkbox(f'Predict Using {model_type}')
             cap = cv2.VideoCapture(rtsp_url)
 
-        # Youtube
-        if options == 'Youtube':
-            youtube_url = st.sidebar.text_input("YouTube Video url:")
-            pred = st.checkbox(f'Predict Using {model_type}')
-            if youtube_url:
-                try:
-                    video = pafy.new(youtube_url)
-                    best = video.getbest(preftype="mp4")
-                    cap = cv2.VideoCapture(best.url)
-                except:
-                    st.warning('Please enter a valid YouTube video url.')
+        # # Youtube
+        # if options == 'Youtube':
+        #     youtube_url = st.sidebar.text_input("YouTube Video url:")
+        #     pred = st.checkbox(f'Predict Using {model_type}')
+        #     if youtube_url:
+        #         try:
+        #             video = pafy.new(youtube_url)
+        #             best = video.getbest(preftype="mp4")
+        #             cap = cv2.VideoCapture(best.url)
+        #         except:
+        #             st.warning('Please enter a valid YouTube video url.')
 
 
 
