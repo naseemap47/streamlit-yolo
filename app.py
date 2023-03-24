@@ -10,6 +10,11 @@ import json
 import pandas as pd
 from model_utils import get_yolo, color_picker_fn, get_system_stat
 from ultralytics import YOLO
+import pafy
+from pathlib import Path
+import sys
+from streamlit_player import st_player
+
 
 #페이지 기본 설정
 st.set_page_config(
@@ -24,7 +29,7 @@ p_time = 0
 st.sidebar.title('Settings')
 # Choose the model
 model_type = st.sidebar.selectbox(
-    'Choose YOLO Model', ('YOLO Model', 'YOLOv8', 'YOLO v5')
+    'Choose YOLO Model', ('YOLO Model', 'YOLOv8', 'YOLOv5')
 )
 
 # #background image
@@ -39,9 +44,6 @@ if not model_type == 'YOLO Model':
     #     f'eg: dir/{model_type}.pt'
     # )
 
-    from pathlib import Path
-    import sys
-
     # Get the absolute path of the current file
     file_path = Path(__file__).resolve()
 
@@ -55,43 +57,33 @@ if not model_type == 'YOLO Model':
     # Get the relative path of the root directory with respect to the current working directory
     ROOT = root_path.relative_to(Path.cwd())
 
-    # model
+    # v5n model
     MODEL_DIR = ROOT / 'weights'
-    DETECTION_MODEL = MODEL_DIR / 'v5n.200.pt'
-    model_path = Path(DETECTION_MODEL)
+    DETECTION_MODEL_5 = MODEL_DIR / 'v5n.200.pt'
+    model_path_5 = Path(DETECTION_MODEL_5)
+
+    # v8n model
+    MODEL_DIR = ROOT / 'weights'
+    DETECTION_MODEL_8 = MODEL_DIR / 'v8m_200.pt'
+    model_path_8 = Path(DETECTION_MODEL_8)
 
 
     if st.sidebar.checkbox('Load Model'):
         
         # YOLOv5 Model
         if model_type == 'YOLOv5':
-            # GPU
-            gpu_option = st.sidebar.radio(
-                'PU Options:', ('CPU', 'GPU'))
-
-            if not torch.cuda.is_available():
-                st.sidebar.warning('CUDA Not Available, So choose CPU', icon="⚠️")
-            else:
-                st.sidebar.success(
-                    'GPU is Available on this Device, Choose GPU for the best performance',
-                    icon="✅"
-                )
-            # Model
-            if gpu_option == 'CPU':
-                model = custom(path_or_model=path_model_file)
-            if gpu_option == 'GPU':
-                model = custom(path_or_model=path_model_file, gpu=True)
+            model = YOLO(model_path_5)
 
         # YOLOv8 Model
         if model_type == 'YOLOv8':
-            model = YOLO(model_path)
+            model = YOLO(model_path_8)
 
         # Load Class names
         class_labels = model.names
 
         # Inference Mode
         options = st.sidebar.radio(
-            'Options:', ('Webcam', 'Image', 'Video', 'RTSP'), index=1)
+            'Options:', ('Webcam', 'Image', 'Video', 'RTSP', 'Youtube'), index=1)
 
         # Confidence
         confidence = st.sidebar.slider(
@@ -167,6 +159,19 @@ if not model_type == 'YOLO Model':
             )
             pred = st.checkbox(f'Predict Using {model_type}')
             cap = cv2.VideoCapture(rtsp_url)
+
+        # Youtube
+        if options == 'Youtube':
+            youtube_url = st.sidebar.text_input("YouTube Video url:")
+            pred = st.checkbox(f'Predict Using {model_type}')
+            if youtube_url:
+                try:
+                    video = pafy.new(youtube_url)
+                    best = video.getbest(preftype="mp4")
+                    cap = cv2.VideoCapture(best.url)
+                except:
+                    st.warning('Please enter a valid YouTube video url.')
+
 
 
 if (cap != None) and pred:
