@@ -7,7 +7,8 @@ RUN apt-get update && \
     python3-pip \
     ffmpeg \
     libsm6 \
-    libxext6
+    libxext6 \
+    git
 RUN pip install -r /home/requirements.txt
 WORKDIR /home
 CMD [ "streamlit", "run", "app.py" ]
