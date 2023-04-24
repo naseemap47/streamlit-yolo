@@ -9,7 +9,7 @@ from collections import Counter
 import json
 import pandas as pd
 from model_utils import get_yolo, color_picker_fn, get_system_stat
-from ultralytics import YOLO
+# from ultralytics import YOLO
 
 
 p_time = 0
@@ -53,6 +53,7 @@ if not model_type == 'YOLO Model':
 
         # YOLOv8 Model
         if model_type == 'YOLOv8':
+            from ultralytics import YOLO
             model = YOLO(path_model_file)
 
         # Load Class names
