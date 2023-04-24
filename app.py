@@ -1,7 +1,7 @@
 import streamlit as st
 import cv2
 import torch
-from hubconf import custom
+from utils.hubconf import custom
 import numpy as np
 import tempfile
 import time
