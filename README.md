@@ -36,8 +36,8 @@ Integrated new YOLOv8 model, now you can run YOLOv8 model on RTSP, Webcam, Video
 
  ## StepUp
 ```
-git clone https://github.com/naseemap47/streamlit-yolov7.git
-cd streamlit-yolov7
+git clone https://github.com/naseemap47/streamlit-yolo.git
+cd streamlit-yolo
 ```
 Install dependency
 ```
@@ -47,4 +47,3 @@ Run **Streamlit**
 ```
 streamlit run app.py
 ```
-
