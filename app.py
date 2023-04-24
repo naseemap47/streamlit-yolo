@@ -10,7 +10,6 @@ import json
 import pandas as pd
 from model_utils import get_yolo, color_picker_fn, get_system_stat
 from ultralytics import YOLO
-import subprocess
 
 
 p_time = 0
@@ -18,7 +17,7 @@ p_time = 0
 st.sidebar.title('Settings')
 # Choose the model
 model_type = st.sidebar.selectbox(
-    'Choose YOLO Model', ('YOLO Model', 'YOLOv8', 'YOLOv7', 'YOLOv5')
+    'Choose YOLO Model', ('YOLO Model', 'YOLOv8', 'YOLOv7')
 )
 
 st.title(f'{model_type} Predictions')
@@ -55,13 +54,6 @@ if not model_type == 'YOLO Model':
         # YOLOv8 Model
         if model_type == 'YOLOv8':
             model = YOLO(path_model_file)
-
-        # YOLOv5 Model
-        if model_type == 'YOLOv5':
-            subprocess.Popen(['git', 'checkout', 'yolov5'])
-            model = torch.hub.load('.', 'custom', path=path_model_file, source='local', force_reload=True)
-        else:
-            subprocess.Popen(['git', 'checkout', 'master'])
 
         # Load Class names
         class_labels = model.names
