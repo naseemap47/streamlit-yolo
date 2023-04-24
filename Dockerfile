@@ -8,7 +8,7 @@ RUN apt-get update && \
     libsm6 \
     libxext6 \
     git
-RUN git clone https://github.com/naseemap47/streamlit-yolov7.git App
+RUN git clone https://github.com/naseemap47/streamlit-yolo.git App
 WORKDIR /App
-RUN pip install -r /App/requirements.txt
+RUN pip install -r requirements.txt
 CMD [ "streamlit", "run", "app.py" ]
