@@ -1,6 +1,5 @@
 FROM ubuntu:20.04
 ARG DEBIAN_FRONTEND=noninteractive
-COPY . /home
 RUN apt-get update && \
     apt-get install -y \
     python3 \
@@ -9,6 +8,7 @@ RUN apt-get update && \
     libsm6 \
     libxext6 \
     git
-RUN pip install -r /home/requirements.txt
-WORKDIR /home
+RUN git clone https://github.com/naseemap47/streamlit-yolov7.git App
+WORKDIR /App
+RUN pip install -r /App/requirements.txt
 CMD [ "streamlit", "run", "app.py" ]
