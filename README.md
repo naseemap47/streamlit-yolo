@@ -1,8 +1,8 @@
 # YOLO Streamlit Dashbord
 Display predicted Video, Images and webcam using YOLO models (**YOLOv7** & **YOLOv8**) with Streamlit
 
-### Sample Streamlit YOLOv7 Dashboard
-Streamlit Dashboard: https://naseemap47-streamlit-yolov7-app-deploy-bfr4xt.streamlitapp.com/
+### Sample Streamlit YOLO Dashboard
+Streamlit Dashboard: https://naseemap47-streamlit-yolo-app-v7gbfg.streamlit.app/
 
 ## Docker
 dockerhub: https://hub.docker.com/repository/docker/naseemap47/streamlit-yolo
