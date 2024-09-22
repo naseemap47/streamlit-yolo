@@ -9,7 +9,6 @@ from collections import Counter
 import json
 import pandas as pd
 from model_utils import get_yolo, color_picker_fn, get_system_stat
-# from ultralytics import YOLO
 
 
 p_time = 0
@@ -52,7 +51,7 @@ if not model_type == 'YOLO Model':
                 model = custom(path_or_model=path_model_file, gpu=True)
 
         # YOLOv8 Model
-        if model_type == 'YOLOv8':
+        elif model_type == 'YOLOv8':
             from ultralytics import YOLO
             model = YOLO(path_model_file)
 
@@ -62,6 +61,8 @@ if not model_type == 'YOLO Model':
         # Inference Mode
         options = st.sidebar.radio(
             'Options:', ('Webcam', 'Image', 'Video', 'RTSP'), index=1)
+        
+        tracker = st.sidebar.selectbox("Choose Tracker", ("Tracker", "bytetrack", "botsort"))
 
         # Confidence
         confidence = st.sidebar.slider(
@@ -91,7 +92,11 @@ if not model_type == 'YOLO Model':
                 FRAME_WINDOW.image(img, channels='BGR')
 
                 if pred:
-                    img, current_no_class = get_yolo(img, model_type, model, confidence, color_pick_list, class_labels, draw_thick)
+                    img, current_no_class = get_yolo(
+                        img, model_type, model, confidence, 
+                        color_pick_list, class_labels, draw_thick,
+                        Tracker=tracker
+                    )
                     FRAME_WINDOW.image(img, channels='BGR')
 
                     # Current number of classes
@@ -107,7 +112,7 @@ if not model_type == 'YOLO Model':
                         st.dataframe(df_fq, use_container_width=True)
         
         # Video
-        if options == 'Video':
+        elif options == 'Video':
             upload_video_file = st.sidebar.file_uploader(
                 'Upload Video', type=['mp4', 'avi', 'mkv'])
             if upload_video_file is not None:
@@ -120,7 +125,7 @@ if not model_type == 'YOLO Model':
 
 
         # Web-cam
-        if options == 'Webcam':
+        elif options == 'Webcam':
             cam_options = st.sidebar.selectbox('Webcam Channel',
                                             ('Select Channel', '0', '1', '2', '3'))
         
@@ -130,7 +135,7 @@ if not model_type == 'YOLO Model':
 
 
         # RTSP
-        if options == 'RTSP':
+        elif options == 'RTSP':
             rtsp_url = st.sidebar.text_input(
                 'RTSP URL:',
                 'eg: rtsp://admin:name6666@198.162.1.58/cam/realmonitor?channel=0&subtype=0'
@@ -152,7 +157,11 @@ if (cap != None) and pred:
             )
             break
 
-        img, current_no_class = get_yolo(img, model_type, model, confidence, color_pick_list, class_labels, draw_thick)
+        img, current_no_class = get_yolo(
+            img, model_type, model, confidence, 
+            color_pick_list, class_labels, draw_thick,
+            Tracker=tracker
+        )
         FRAME_WINDOW.image(img, channels='BGR')
 
         # FPS
